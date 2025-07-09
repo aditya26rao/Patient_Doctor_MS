@@ -1,0 +1,319 @@
+{% extends 'core/base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Book Appointment - HealthCare+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <div class="welcome-section">
+                    <h2 class="display-6 fw-bold">
+                        <i class="fas fa-calendar-plus"></i> Book New Appointment
+                    </h2>
+                    <p class="lead mb-0">Schedule your appointment with our healthcare professionals</p>
+                </div>
+            </div>
+
+            <!-- Appointment Form -->
+            <div class="dashboard-card p-4">
+                <form method="POST" id="appointmentForm">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <!-- Doctor Selection -->
+                        <div class="col-md-6 mb-4">
+                            <label for="{{ form.doctor.id_for_label }}" class="form-label fw-semibold">
+                                <i class="fas fa-user-md text-primary"></i> Select Doctor
+                            </label>
+                            {{ form.doctor }}
+                            {% if form.doctor.errors %}
+                                <div class="text-danger small mt-1">{{ form.doctor.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">Choose from our available healthcare professionals</div>
+                        </div>
+
+                        <!-- Appointment Date -->
+                        <div class="col-md-6 mb-4">
+                            <label for="{{ form.date.id_for_label }}" class="form-label fw-semibold">
+                                <i class="fas fa-calendar text-primary"></i> Appointment Date
+                            </label>
+                            {{ form.date }}
+                            {% if form.date.errors %}
+                                <div class="text-danger small mt-1">{{ form.date.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">Select your preferred date</div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Appointment Time -->
+                        <div class="col-md-6 mb-4">
+                            <label for="{{ form.time.id_for_label }}" class="form-label fw-semibold">
+                                <i class="fas fa-clock text-primary"></i> Appointment Time
+                            </label>
+                            {{ form.time }}
+                            {% if form.time.errors %}
+                                <div class="text-danger small mt-1">{{ form.time.errors }}</div>
+                            {% endif %}
+                            <div class="form-text">Choose your preferred time slot</div>
+                        </div>
+
+                        <!-- Priority Level -->
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-exclamation-circle text-warning"></i> Priority Level
+                            </label>
+                            <select class="form-select" name="priority">
+                                <option value="normal">Normal</option>
+                                <option value="urgent">Urgent</option>
+                                <option value="emergency">Emergency</option>
+                            </select>
+                            <div class="form-text">Select appointment priority</div>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-4">
+                        <label for="{{ form.description.id_for_label }}" class="form-label fw-semibold">
+                            <i class="fas fa-notes-medical text-primary"></i> Reason for Visit / Symptoms
+                        </label>
+                        {{ form.description }}
+                        {% if form.description.errors %}
+                            <div class="text-danger small mt-1">{{ form.description.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Please describe your symptoms or reason for the appointment in detail</div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-phone text-primary"></i> Contact Number
+                            </label>
+                            <input type="tel" class="form-control" name="contact_number" placeholder="Enter your phone number">
+                            <div class="form-text">For appointment confirmations and reminders</div>
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <label class="form-label fw-semibold">
+                                <i class="fas fa-envelope text-primary"></i> Email Address
+                            </label>
+                            <input type="email" class="form-control" name="email" value="{{ request.user.email }}" readonly>
+                            <div class="form-text">Appointment confirmation will be sent here</div>
+                        </div>
+                    </div>
+
+                    <!-- Medical History Checkbox -->
+                    <div class="mb-4">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="first_visit" id="firstVisit">
+                            <label class="form-check-label" for="firstVisit">
+                                This is my first visit with this doctor
+                            </label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="medications" id="onMedications">
+                            <label class="form-check-label" for="onMedications">
+                                I am currently taking medications
+                            </label>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="allergies" id="hasAllergies">
+                            <label class="form-check-label" for="hasAllergies">
+                                I have known allergies
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="mb-4">
+                        <div class="alert alert-info">
+                            <h6><i class="fas fa-info-circle"></i> Important Information:</h6>
+                            <ul class="mb-0 small">
+                                <li>Please arrive 15 minutes before your scheduled appointment</li>
+                                <li>Bring a valid ID and insurance card if applicable</li>
+                                <li>You can reschedule or cancel up to 24 hours before the appointment</li>
+                                <li>Emergency appointments are subject to availability</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="form-check mb-4">
+                        <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                        <label class="form-check-label" for="agreeTerms">
+                            I agree to the <a href="#" class="text-primary">Terms and Conditions</a> and <a href="#" class="text-primary">Privacy Policy</a>
+                        </label>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{% url 'dashboard' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to Dashboard
+                        </a>
+                        
+                        <div>
+                            <button type="button" class="btn btn-outline-primary me-2" onclick="saveDraft()">
+                                <i class="fas fa-save"></i> Save Draft
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-calendar-check"></i> Book Appointment
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sidebar with helpful information -->
+        <div class="col-lg-4 mt-4 mt-lg-0">
+            <!-- Available Time Slots -->
+            <div class="dashboard-card p-4 mb-4">
+                <h6 class="fw-bold mb-3"><i class="fas fa-clock text-primary"></i> Available Time Slots</h6>
+                <div class="small">
+                    <div class="mb-2"><strong>Morning:</strong> 9:00 AM - 12:00 PM</div>
+                    <div class="mb-2"><strong>Afternoon:</strong> 1:00 PM - 5:00 PM</div>
+                    <div class="mb-2"><strong>Evening:</strong> 6:00 PM - 8:00 PM</div>
+                </div>
+                <div class="alert alert-warning small mt-3 mb-0">
+                    <i class="fas fa-exclamation-triangle"></i> Weekend appointments are limited and subject to availability.
+                </div>
+            </div>
+
+            <!-- Doctor Specializations -->
+            <div class="dashboard-card p-4 mb-4">
+                <h6 class="fw-bold mb-3"><i class="fas fa-stethoscope text-success"></i> Our Specializations</h6>
+                <div class="small">
+                    <div class="mb-2"><i class="fas fa-heart text-danger"></i> Cardiology</div>
+                    <div class="mb-2"><i class="fas fa-brain text-info"></i> Neurology</div>
+                    <div class="mb-2"><i class="fas fa-bone text-warning"></i> Orthopedics</div>
+                    <div class="mb-2"><i class="fas fa-eye text-primary"></i> Ophthalmology</div>
+                    <div class="mb-2"><i class="fas fa-child text-success"></i> Pediatrics</div>
+                    <div class="mb-0"><i class="fas fa-user-md text-secondary"></i> General Practice</div>
+                </div>
+            </div>
+
+            <!-- Contact Support -->
+            <div class="dashboard-card p-4">
+                <h6 class="fw-bold mb-3"><i class="fas fa-headset text-info"></i> Need Help?</h6>
+                <p class="small mb-3">Having trouble booking your appointment? Our support team is here to help!</p>
+                <div class="d-grid gap-2">
+                    <a href="tel:+1-800-HEALTH" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-phone"></i> Call Support
+                    </a>
+                    <a href="#" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-comment"></i> Live Chat
+                    </a>
+                    <a href="mailto:support@healthcare.com" class="btn btn-outline-info btn-sm">
+                        <i class="fas fa-envelope"></i> Email Us
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    // Set form field classes for better styling
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add Bootstrap classes to form fields
+        const formFields = document.querySelectorAll('#appointmentForm input, #appointmentForm select, #appointmentForm textarea');
+        formFields.forEach(field => {
+            if (!field.classList.contains('form-check-input')) {
+                field.classList.add('form-control');
+            }
+        });
+
+        // Set minimum date to today
+        const dateField = document.querySelector('input[type="date"]');
+        if (dateField) {
+            const today = new Date().toISOString().split('T')[0];
+            dateField.setAttribute('min', today);
+        }
+
+        // Set time field to show only working hours
+        const timeField = document.querySelector('input[type="time"]');
+        if (timeField) {
+            timeField.setAttribute('min', '09:00');
+            timeField.setAttribute('max', '20:00');
+        }
+    });
+
+    // Save draft functionality
+    function saveDraft() {
+        const formData = new FormData(document.getElementById('appointmentForm'));
+        localStorage.setItem('appointmentDraft', JSON.stringify(Object.fromEntries(formData)));
+        
+        // Show success message
+        const alert = document.createElement('div');
+        alert.className = 'alert alert-success alert-dismissible fade show';
+        alert.innerHTML = `
+            <i class="fas fa-check-circle"></i> Draft saved successfully!
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        document.querySelector('.container').insertBefore(alert, document.querySelector('.row'));
+        
+        // Auto hide after 3 seconds
+        setTimeout(() => {
+            if (alert.parentNode) {
+                alert.parentNode.removeChild(alert);
+            }
+        }, 3000);
+    }
+
+    // Load draft on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        const draft = localStorage.getItem('appointmentDraft');
+        if (draft) {
+            const draftData = JSON.parse(draft);
+            Object.keys(draftData).forEach(key => {
+                const field = document.querySelector(`[name="${key}"]`);
+                if (field) {
+                    if (field.type === 'checkbox') {
+                        field.checked = draftData[key] === 'on';
+                    } else {
+                        field.value = draftData[key];
+                    }
+                }
+            });
+        }
+    });
+
+    // Clear draft after successful submission
+    document.getElementById('appointmentForm').addEventListener('submit', function() {
+        localStorage.removeItem('appointmentDraft');
+    });
+
+    // Form validation
+    document.getElementById('appointmentForm').addEventListener('submit', function(e) {
+        const requiredFields = ['doctor', 'date', 'time', 'description'];
+        let isValid = true;
+        
+        requiredFields.forEach(fieldName => {
+            const field = document.querySelector(`[name="${fieldName}"]`);
+            if (!field.value.trim()) {
+                isValid = false;
+                field.classList.add('is-invalid');
+            } else {
+                field.classList.remove('is-invalid');
+            }
+        });
+        
+        if (!document.getElementById('agreeTerms').checked) {
+            isValid = false;
+            document.getElementById('agreeTerms').classList.add('is-invalid');
+        }
+        
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fill in all required fields and agree to the terms and conditions.');
+        }
+    });
+</script>
+{% endblock %}

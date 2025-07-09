@@ -1,0 +1,59 @@
+{% extends "core/base.html" %}
+{% block content %}
+<div class="container my-5">
+    <div class="card bg-light p-4 text-dark shadow-sm rounded">
+        <h2 class="text-center mb-4">📊 Admin Dashboard</h2>
+        <div class="row text-center">
+            <div class="col-md-6 mb-4">
+                <div class="p-4 bg-primary text-white rounded">
+                    <h5>Total Doctors</h5>
+                    <h3>{{ doctor_count }}</h3>
+                </div>
+            </div>
+            <div class="col-md-6 mb-4">
+                <div class="p-4 bg-success text-white rounded">
+                    <h5>Total Patients</h5>
+                    <h3>{{ patient_count }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="mt-5">
+            <h4 class="text-center mb-3">📅 Appointments Over Time</h4>
+            <canvas id="appointmentChart" height="120"></canvas>
+        </div>
+
+        <div class="text-center mt-4">
+            <a href="{% url 'dashboard' %}" class="btn btn-secondary">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('appointmentChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ dates|safe }},
+            datasets: [{
+                label: 'Appointments',
+                data: {{ counts|safe }},
+                fill: true,
+                borderColor: '#007bff',
+                backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: { stepSize: 1 }
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

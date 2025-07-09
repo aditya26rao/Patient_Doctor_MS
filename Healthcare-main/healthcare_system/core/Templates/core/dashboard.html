@@ -1,0 +1,246 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - HealthCare+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="display-5 fw-bold mb-2">
+                    <i class="fas fa-hand-wave"></i> Welcome back, {{ request.user.first_name|default:request.user.username }}!
+                </h1>
+                <p class="lead mb-0">
+                    You're logged in as a <span class="badge bg-primary">{{ profile.user_type|title }}</span>
+                    {% if profile.user_type == 'doctor' and profile.specialization %}
+                        | Specialization: <span class="badge bg-info">{{ profile.specialization }}</span>
+                    {% endif %}
+                </p>
+                <p class="mt-2 mb-0">
+                    <i class="fas fa-calendar-alt"></i> Today is {{ "now"|date:"F d, Y" }}
+                    <span class="ms-3"><i class="fas fa-clock"></i> {{ "now"|date:"g:i A" }}</span>
+                </p>
+            </div>
+            <div class="col-md-4 text-center">
+                <i class="fas fa-user-md fa-5x opacity-75"></i>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Quick Stats -->
+            <div class="row mb-4">
+                <div class="col-md-6 mb-3">
+                    <div class="stat-card">
+                        <i class="fas fa-calendar-check"></i>
+                        <h3>{{ appointments|length }}</h3>
+                        <p class="mb-0">Total Appointments</p>
+                    </div>
+                </div>
+                <div class="col-md-6 mb-3">
+                    <div class="stat-card" style="background: linear-gradient(135deg, #10b981, #059669);">
+                        <i class="fas fa-clock"></i>
+                        <h3>{{ upcoming_count|default:0 }}</h3>
+                        <p class="mb-0">Upcoming</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Appointments Section -->
+            <div class="dashboard-card p-4 mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h4 class="mb-0">
+                        <i class="fas fa-calendar-alt text-primary"></i> 
+                        {% if profile.user_type == 'patient' %}
+                            My Appointments
+                        {% else %}
+                            Patient Appointments
+                        {% endif %}
+                    </h4>
+                    {% if profile.user_type == 'patient' %}
+                        <a href="{% url 'book_appointment' %}" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Book New Appointment
+                        </a>
+                    {% endif %}
+                </div>
+
+                {% if appointments %}
+                    <div class="row">
+                        {% for appointment in appointments %}
+                            <div class="col-md-12 mb-3">
+                                <div class="appointment-card p-3">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-2 text-center">
+                                            <div class="fw-bold text-primary">{{ appointment.date|date:"M" }}</div>
+                                            <div class="h4 text-dark">{{ appointment.date|date:"d" }}</div>
+                                            <div class="small text-muted">{{ appointment.date|date:"Y" }}</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <h6 class="mb-1">
+                                                {% if profile.user_type == 'patient' %}
+                                                    <i class="fas fa-user-md text-primary"></i> Dr. {{ appointment.doctor.first_name|default:appointment.doctor.username }}
+                                                {% else %}
+                                                    <i class="fas fa-user text-primary"></i> {{ appointment.patient.first_name|default:appointment.patient.username }}
+                                                {% endif %}
+                                            </h6>
+                                            <p class="mb-1 text-muted">{{ appointment.description|truncatechars:100 }}</p>
+                                            <small class="text-muted">
+                                                <i class="fas fa-clock"></i> {{ appointment.time|time:"g:i A" }}
+                                            </small>
+                                        </div>
+                                        <div class="col-md-2 text-center">
+                                            {% if appointment.date >= "now"|date:"Y-m-d" %}
+                                                <span class="status-badge status-upcoming">Upcoming</span>
+                                            {% else %}
+                                                <span class="status-badge status-completed">Completed</span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="col-md-2 text-end">
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye"></i> View Details</a></li>
+                                                    {% if appointment.date >= "now"|date:"Y-m-d" and profile.user_type == 'patient' %}
+                                                        <li><a class="dropdown-item" href="#"><i class="fas fa-edit"></i> Reschedule</a></li>
+                                                        <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times"></i> Cancel</a></li>
+                                                    {% endif %}
+                                                    <li><a class="dropdown-item" href="#"><i class="fas fa-download"></i> Download PDF</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Pagination would go here if needed -->
+                    {% if appointments|length > 5 %}
+                        <div class="text-center mt-3">
+                            <a href="#" class="btn btn-outline-primary">View All Appointments</a>
+                        </div>
+                    {% endif %}
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-calendar-times fa-4x text-muted mb-3"></i>
+                        <h5 class="text-muted">No appointments yet</h5>
+                        {% if profile.user_type == 'patient' %}
+                            <p class="text-muted">Book your first appointment to get started!</p>
+                            <a href="{% url 'book_appointment' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Book Your First Appointment
+                            </a>
+                        {% else %}
+                            <p class="text-muted">Patient appointments will appear here once they book appointments with you.</p>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="dashboard-card p-4">
+                <h5 class="mb-3"><i class="fas fa-history text-primary"></i> Recent Activity</h5>
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-check-circle text-success me-3"></i>
+                        <div>
+                            <div class="fw-medium">Account created successfully</div>
+                            <small class="text-muted">{{ request.user.date_joined|date:"M d, Y g:i A" }}</small>
+                        </div>
+                    </div>
+                    {% for appointment in appointments|slice:":3" %}
+                    <div class="list-group-item d-flex align-items-center">
+                        <i class="fas fa-calendar-plus text-primary me-3"></i>
+                        <div>
+                            <div class="fw-medium">Appointment scheduled</div>
+                            <small class="text-muted">{{ appointment.created_at|date:"M d, Y g:i A" }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <div class="sidebar">
+                <h6 class="fw-bold mb-3">Quick Actions</h6>
+                
+                {% if profile.user_type == 'patient' %}
+                    <a href="{% url 'book_appointment' %}" class="sidebar-item">
+                        <i class="fas fa-calendar-plus"></i> Book Appointment
+                    </a>
+                    <a href="#" class="sidebar-item">
+                        <i class="fas fa-user-edit"></i> Update Profile
+                    </a>
+                    <a href="#" class="sidebar-item">
+                        <i class="fas fa-file-medical"></i> Medical Records
+                    </a>
+                    <a href="#" class="sidebar-item">
+                        <i class="fas fa-prescription-bottle"></i> Prescriptions
+                    </a>
+                {% else %}
+                    <a href="#" class="sidebar-item">
+                        <i class="fas fa-user-edit"></i> Update Profile
+                    </a>
+                    <a href="#" class="sidebar-item">
+                        <i class="fas fa-calendar-alt"></i> Manage Schedule
+                    </a>
+                    <a href="#" class="sidebar-item">
+                        <i class="fas fa-users"></i> Patient List
+                    </a>
+                    <a href="#" class="sidebar-item">
+                        <i class="fas fa-chart-line"></i> Reports
+                    </a>
+                {% endif %}
+                
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-bell"></i> Notifications
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-cog"></i> Settings
+                </a>
+                <a href="#" class="sidebar-item">
+                    <i class="fas fa-question-circle"></i> Help & Support
+                </a>
+            </div>
+
+            <!-- Health Tips -->
+            <div class="dashboard-card p-4 mt-4">
+                <h6 class="fw-bold mb-3"><i class="fas fa-lightbulb text-warning"></i> Health Tips</h6>
+                <div class="small">
+                    <div class="mb-3 p-3 bg-light rounded">
+                        <div class="fw-medium text-primary">💧 Stay Hydrated</div>
+                        <div class="text-muted">Drink at least 8 glasses of water daily for optimal health.</div>
+                    </div>
+                    <div class="mb-3 p-3 bg-light rounded">
+                        <div class="fw-medium text-success">🏃‍♂️ Exercise Regularly</div>
+                        <div class="text-muted">Aim for 30 minutes of moderate exercise 5 times a week.</div>
+                    </div>
+                    <div class="p-3 bg-light rounded">
+                        <div class="fw-medium text-info">😴 Get Enough Sleep</div>
+                        <div class="text-muted">Adults need 7-9 hours of quality sleep each night.</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Emergency Contact -->
+            <div class="dashboard-card p-4 mt-4 border-danger">
+                <h6 class="fw-bold mb-3 text-danger"><i class="fas fa-exclamation-triangle"></i> Emergency</h6>
+                <p class="small mb-2">In case of medical emergency, call:</p>
+                <div class="d-grid">
+                    <a href="tel:911" class="btn btn-danger">
+                        <i class="fas fa-phone"></i> Call 911
+                    </a>
+                </div>
+                <p class="small text-muted mt-2 mb-0">For non-emergency support, contact our 24/7 helpline at +1-800-HEALTH</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
